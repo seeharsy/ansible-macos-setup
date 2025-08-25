@@ -66,9 +66,8 @@ Uses pre-downloaded DMG and ZIP files. **Note:** Large files are not included in
    mkdir -p roles/macos_config/files
    ```
 
-2. **Download required files:**
-   - Run the download script: `./download_files.sh`
-   - Or manually download files listed below
+2. **Download required files manually:**
+   - Download files listed below and place them in `roles/macos_config/files/`
 
 3. **Required files for offline mode:**
    - `Xcode_15.4.xip` (from Apple Developer Portal)
@@ -117,7 +116,6 @@ Uses pre-downloaded DMG and ZIP files. **Note:** Large files are not included in
 ansible-macos-setup/
 ├── inventory.yml              # Target machines
 ├── playbook.yml              # Main playbook
-├── download_files.sh         # Script to download offline files
 ├── collections/
 │   └── requirements.yml      # Ansible collections
 ├── roles/
@@ -135,7 +133,7 @@ ansible-macos-setup/
 Due to GitHub's file size limitations, large files (DMGs, XIPs, etc.) are not included in this repository. These files are excluded via `.gitignore`.
 
 ### Offline Files
-For offline installations, you need to manually download the required files and place them in `roles/macos_config/files/`. The `download_files.sh` script provides guidance on what files are needed.
+For offline installations, you need to manually download the required files and place them in `roles/macos_config/files/`. See the "Required files for offline mode" section above for a list of needed files.
 
 ### File Sources
 - **Xcode**: Download from [Apple Developer Portal](https://developer.apple.com/download/)
