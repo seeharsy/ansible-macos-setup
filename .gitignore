@@ -40,11 +40,12 @@ logs/
 /tmp/
 /temp/
 
-# Large files (DMGs, XIPs, etc.)
+# Large files (DMGs, XIPs, etc.) - These should be downloaded separately
 *.dmg
 *.xip
 *.tar.xz
 *.zip
+*.pkg
 
 # Sensitive data
 *.key

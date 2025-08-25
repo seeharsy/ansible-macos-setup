@@ -57,10 +57,29 @@ macos_config_offline_mode: false
 ```
 
 ### Offline Mode
-Uses pre-downloaded DMG and ZIP files:
-```yaml
-macos_config_offline_mode: true
-```
+Uses pre-downloaded DMG and ZIP files. **Note:** Large files are not included in this repository due to size limitations.
+
+#### Setting Up Offline Mode
+
+1. **Create the files directory:**
+   ```bash
+   mkdir -p roles/macos_config/files
+   ```
+
+2. **Download required files:**
+   - Run the download script: `./download_files.sh`
+   - Or manually download files listed below
+
+3. **Required files for offline mode:**
+   - `Xcode_15.4.xip` (from Apple Developer Portal)
+   - `Xcode_16.4.xip` (from Apple Developer Portal)
+   - `LLVM-19.1.7-macOS-ARM64.tar.xz` (from LLVM releases)
+   - Various application DMG files (see task files for complete list)
+
+4. **Enable offline mode:**
+   ```yaml
+   macos_config_offline_mode: true
+   ```
 
 ## What Gets Installed
 
@@ -98,16 +117,31 @@ macos_config_offline_mode: true
 ansible-macos-setup/
 ├── inventory.yml              # Target machines
 ├── playbook.yml              # Main playbook
+├── download_files.sh         # Script to download offline files
 ├── collections/
 │   └── requirements.yml      # Ansible collections
 ├── roles/
 │   └── macos_config/         # Main role
 │       ├── defaults/         # Default variables
-│       ├── files/           # DMG, ZIP, and other files
+│       ├── files/           # DMG, ZIP, and other files (not in repo)
 │       ├── tasks/           # Task files
 │       └── vars/            # Variable definitions
 └── README.md
 ```
+
+## File Management
+
+### Large Files
+Due to GitHub's file size limitations, large files (DMGs, XIPs, etc.) are not included in this repository. These files are excluded via `.gitignore`.
+
+### Offline Files
+For offline installations, you need to manually download the required files and place them in `roles/macos_config/files/`. The `download_files.sh` script provides guidance on what files are needed.
+
+### File Sources
+- **Xcode**: Download from [Apple Developer Portal](https://developer.apple.com/download/)
+- **LLVM**: Download from [LLVM releases](https://releases.llvm.org/)
+- **Applications**: Download DMG files from official websites
+- **Other tools**: Download from respective project websites
 
 ## Contributing
 
