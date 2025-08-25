@@ -1,0 +1,61 @@
+# Ansible
+*.retry
+*.pyc
+__pycache__/
+.ansible/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+/temp/
+
+# Large files (DMGs, XIPs, etc.)
+*.dmg
+*.xip
+*.tar.xz
+*.zip
+
+# Sensitive data
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.yml
+vault.yml
+*.vault
+
+# Backup files
+*.bak
+*.backup
+*.old

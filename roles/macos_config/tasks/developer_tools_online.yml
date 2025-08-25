@@ -1,0 +1,35 @@
+# Developer tools (online): Homebrew and online package installs
+
+- name: Install developer tools with Homebrew (casks)
+  become: false
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - yubico-authenticator
+    - wireshark
+    - podman-desktop
+    - drawio
+    - kitty
+    - obsidian
+    - macvim
+    - google-chrome
+    - gpg-suite
+    - cmake
+    - ghidra
+
+- name: Install developer tools with Homebrew (formulae)
+  become: false
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - pass
+    - pass-otp
+    - python@3.13
+    - gitlab-runner
+    - podman
+    - openjdk@21
+    - minio-mc  
+    - ninja
+    - llvm

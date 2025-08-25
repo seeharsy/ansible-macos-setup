@@ -1,0 +1,35 @@
+- name: Bootstrap sudoers configuration
+  ansible.builtin.include_tasks: bootstrap_sudo.yml
+
+- name: Check if Homebrew is installed
+  ansible.builtin.command: which brew
+  register: brew_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Check if Homebrew exists in /opt/homebrew/bin/brew
+  ansible.builtin.stat:
+    path: /opt/homebrew/bin/brew
+  register: brew_opt_check
+  when: brew_check.rc != 0
+
+- name: Add Homebrew to PATH if it exists in /opt/homebrew/bin
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: 'export PATH="/opt/homebrew/bin:$PATH"'
+    create: true
+  when: brew_check.rc != 0 and brew_opt_check.stat.exists
+
+- name: Install Homebrew online
+  become: false
+  ansible.builtin.shell: NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  args:
+    creates: /opt/homebrew/bin/brew
+  when: brew_check.rc != 0
+
+- name: Ensure Homebrew is in PATH
+  ansible.builtin.lineinfile:
+    path: "{{ macos_config_target_shell_profile }}"
+    line: 'eval "$(/opt/homebrew/bin/brew shellenv)"'
+    create: true
+    mode: '0644'

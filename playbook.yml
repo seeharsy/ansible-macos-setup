@@ -1,0 +1,16 @@
+---
+- name: Configure my macOS machine(s)
+  hosts: all
+  pre_tasks:
+    - name: Trigger Xcode Command Line Tools install if Python is missing
+      raw: |
+        if ! command -v python3 >/dev/null 2>&1; then
+          xcode-select --install || true
+          echo 'Python is missing. Please complete the Xcode Command Line Tools installation and re-run the playbook.'
+          exit 1
+        fi
+      ignore_errors: false
+  vars:
+    macos_config_offline_mode: false    # set to true for offline installs
+  roles:
+    - role: macos_config

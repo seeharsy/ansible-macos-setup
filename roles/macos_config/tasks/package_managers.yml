@@ -1,0 +1,32 @@
+# MacPorts installation tasks
+
+- name: Check if MacPorts is installed
+  ansible.builtin.stat:
+    path: /opt/local/bin/port
+  register: macports_stat
+
+- name: Download MacPorts installer
+  when: not macports_stat.stat.exists and not macos_config_offline_mode
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ macos_config_macports_url }}"
+    dest: "/tmp/{{ macos_config_macports_filename }}"
+    mode: '0644'
+
+- name: Install MacPorts online
+  when: not macports_stat.stat.exists and not macos_config_offline_mode
+  become: true
+  ansible.builtin.command: installer -pkg "/tmp/{{ macos_config_macports_filename }}" -target /
+
+- name: Copy MacPorts installer to remote host
+  when: not macports_stat.stat.exists and macos_config_offline_mode
+  become: true
+  ansible.builtin.copy:
+    src: "{{ macos_config_macports_offline_path }}"
+    dest: "/tmp/{{ macos_config_macports_filename }}"
+    mode: '0644'
+
+- name: Install MacPorts offline
+  when: not macports_stat.stat.exists and macos_config_offline_mode
+  become: true
+  ansible.builtin.command: installer -pkg "/tmp/{{ macos_config_macports_filename }}" -target / 

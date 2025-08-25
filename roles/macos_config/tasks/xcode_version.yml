@@ -1,0 +1,58 @@
+---
+- name: Check if Xcode is already installed
+  ansible.builtin.stat:
+    path: "{{ xcode_item.app_path }}"
+  register: xcode_installed
+
+- name: Copy Xcode .xip file to remote host (if not already installed)
+  ansible.builtin.copy:
+    src: "{{ xcode_item.xip_path }}"
+    dest: "/tmp/{{ xcode_item.xip_path | basename }}"
+    mode: '0644'
+  when: 
+    - not xcode_installed.stat.exists
+    - xcode_item.xip_path is defined
+
+- name: Check if Xcode .xip exists
+  ansible.builtin.stat:
+    path: "/tmp/{{ xcode_item.xip_path | basename }}"
+  register: xip_file
+  when: not xcode_installed.stat.exists
+
+- name: Fail if Xcode .xip is missing
+  ansible.builtin.fail:
+    msg: "Xcode .xip file not found at /tmp/{{ xcode_item.xip_path | basename }}. Please provide the file."
+  when: not xcode_installed.stat.exists and not xip_file.stat.exists
+
+- name: Expand Xcode .xip
+  become: true
+  ansible.builtin.command: >
+    xip --expand "/tmp/{{ xcode_item.xip_path | basename }}"
+  args:
+    chdir: "{{ xcode_temp_dir }}"
+    creates: "{{ xcode_temp_dir }}/Xcode.app"
+  when: not xcode_installed.stat.exists and xip_file.stat.exists
+
+- name: Move extracted Xcode to /Applications
+  become: true
+  ansible.builtin.command: >
+    mv "{{ xcode_temp_dir }}/Xcode.app" "{{ xcode_item.app_path }}"
+  args:
+    creates: "{{ xcode_item.app_path }}"
+  when: not xcode_installed.stat.exists and xip_file.stat.exists
+
+- name: Cleanup extracted Xcode.app from temp dir
+  become: true
+  ansible.builtin.file:
+    path: "{{ xcode_temp_dir }}/Xcode.app"
+    state: absent
+  when: not xcode_installed.stat.exists and xip_file.stat.exists
+
+- name: Skip Xcode license acceptance (requires interactive input)
+  ansible.builtin.debug:
+    msg: |
+      Xcode license acceptance requires interactive input.
+      Please accept the license manually by running:
+      sudo xcodebuild -license accept
+      in the Xcode directory: {{ xcode_item.app_path }}
+  when: xcode_installed.stat.exists or (not xcode_installed.stat.exists and xip_file.stat.exists)

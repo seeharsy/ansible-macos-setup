@@ -1,0 +1,19 @@
+- name: Install and configure all required Xcode versions
+  vars:
+    xcode_temp_dir: "/tmp/xcode_install"
+  block:
+    - name: Ensure temp dir exists
+      ansible.builtin.file:
+        path: "{{ xcode_temp_dir }}"
+        state: directory
+        mode: '0700'
+
+    - name: Sort Xcode versions (latest first)
+      ansible.builtin.set_fact:
+        sorted_xcodes: "{{ macos_config_xcodes | sort(attribute='version', reverse=true) }}"
+
+    - name: Loop over Xcode versions (latest first)
+      ansible.builtin.include_tasks: xcode_version.yml
+      loop: "{{ sorted_xcodes }}"
+      loop_control:
+        loop_var: xcode_item

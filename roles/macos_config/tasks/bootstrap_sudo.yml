@@ -1,0 +1,19 @@
+# Bootstrap: Configure passwordless sudo
+
+- name: Ensure passwordless sudo for current user
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ ansible_user_id }}-nopasswd"
+    content: "{{ ansible_user_id }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: wheel
+    mode: '0440'
+
+- name: Ensure passwordless sudo for admin group
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/admin-nopasswd"
+    content: "%admin ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: wheel
+    mode: '0440' 

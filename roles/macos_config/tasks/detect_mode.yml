@@ -1,0 +1,13 @@
+- name: Test internet connectivity
+  ansible.builtin.uri:
+    url: https://www.google.com
+    method: GET
+    return_content: false
+    status_code: 200
+  register: netcheck
+  ignore_errors: true
+
+- name: Set offline_mode fact
+  ansible.builtin.set_fact:
+    macos_config_offline_mode: "{{ not netcheck is succeeded }}"
+  when: macos_config_offline_mode is not defined

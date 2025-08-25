@@ -1,0 +1,42 @@
+macos_config_offline_mode: true # Set to true for offline mode
+macos_config_xcodes:
+  - version: "15.4"
+    xip_path: "{{ role_path }}/files/Xcode_15.4.xip"
+    app_path: "/Applications/Xcode_15.4.app"
+    set_active: false
+  - version: "16.4"
+    xip_path: "{{ role_path }}/files/Xcode_16.4.xip"
+    app_path: "/Applications/Xcode_16.4.app"
+    set_active: true
+macos_config_python_pkg_path: "{{ role_path }}/files/python-3.13.0-macosx.pkg"
+macos_config_gitlab_runner_pkg: "{{ role_path }}/files/gitlab-runner.pkg"
+
+# Remote machine support
+macos_config_target_user: "{{ ansible_user | default('admin') }}"
+macos_config_target_home: "/Users/{{ macos_config_target_user }}"
+macos_config_target_shell_profile: "{{ macos_config_target_home }}/.zprofile"
+
+# MacPorts configuration
+macos_config_macports_version: "2.11.0"
+macos_config_macports_build: "15"
+macos_config_macports_filename: >-
+  MacPorts-{{ macos_config_macports_version }}-{{ macos_config_macports_build }}-Sequoia.pkg
+macos_config_macports_url: >-
+  https://github.com/macports/macports-base/releases/download/v{{ macos_config_macports_version }}/{{ macos_config_macports_filename }}
+macos_config_macports_offline_path: "{{ role_path }}/files/{{ macos_config_macports_filename }}"
+
+# LLVM configuration
+macos_config_llvm_version: "19.1.7"
+macos_config_llvm_url: >-
+  https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ macos_config_llvm_version }}/LLVM-{{ macos_config_llvm_version }}-macOS-ARM64.tar.xz
+macos_config_llvm_filename: "LLVM-{{ macos_config_llvm_version }}-macOS-ARM64.tar.xz"
+macos_config_llvm_offline_path: "{{ role_path }}/files/{{ macos_config_llvm_filename }}"
+macos_config_llvm_install_path: "/opt"
+
+# Ninja configuration
+macos_config_ninja_version: "1.12.1"
+macos_config_ninja_url: >-
+  https://github.com/ninja-build/ninja/releases/download/v{{ macos_config_ninja_version }}/ninja-mac.zip
+macos_config_ninja_filename: "ninja-mac-v{{ macos_config_ninja_version }}.zip"
+macos_config_ninja_offline_path: "{{ role_path }}/files/{{ macos_config_ninja_filename }}"
+macos_config_ninja_install_path: "/opt"

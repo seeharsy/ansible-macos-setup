@@ -1,0 +1,19 @@
+- name: Detect mode (online/offline)
+  ansible.builtin.include_tasks: detect_mode.yml
+
+- name: Bootstrap sudoers configuration and Homebrew
+  ansible.builtin.include_tasks: bootstrap.yml
+
+- name: Install MacPorts
+  ansible.builtin.include_tasks: package_managers.yml
+
+- name: Install developer tools (offline)
+  ansible.builtin.include_tasks: developer_tools_offline.yml
+  when: macos_config_offline_mode
+
+- name: Install developer tools (online)
+  ansible.builtin.include_tasks: developer_tools_online.yml
+  when: not macos_config_offline_mode
+
+- name: Install Xcode
+  ansible.builtin.include_tasks: xcode.yml

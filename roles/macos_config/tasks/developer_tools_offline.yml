@@ -1,0 +1,490 @@
+# Developer tools (offline): DMG installations
+
+- name: Install JDK 21 from DMG
+  become: true
+  block:
+    - name: Check if JDK 21 is already installed
+      ansible.builtin.stat:
+        path: /Library/Java/JavaVirtualMachines/jdk-21.jdk
+      register: jdk_check
+
+    - name: Copy JDK DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/jdk-21_macos-aarch64_bin.dmg"
+        dest: "/tmp/jdk-21_macos-aarch64_bin.dmg"
+        mode: '0644'
+      when: not jdk_check.stat.exists
+
+    - name: Mount JDK DMG
+      ansible.builtin.command: hdiutil attach "/tmp/jdk-21_macos-aarch64_bin.dmg" -nobrowse -noverify
+      register: jdk_mount
+      changed_when: jdk_mount.rc == 0
+      when: not jdk_check.stat.exists
+
+    - name: Get JDK mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/jdk-21_macos-aarch64_bin.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: jdk_mount_path
+      changed_when: jdk_mount_path.rc == 0
+      when: not jdk_check.stat.exists
+
+    - name: Copy JDK package to temp
+      ansible.builtin.command: cp -R "{{ jdk_mount_path.stdout }}/JDK 21.0.7.pkg" /tmp/
+      when: not jdk_check.stat.exists and jdk_mount.rc == 0
+      changed_when: jdk_mount.rc == 0
+
+    - name: Install JDK package
+      ansible.builtin.command: installer -pkg "/tmp/JDK 21.0.7.pkg" -target /
+      when: not jdk_check.stat.exists and jdk_mount.rc == 0
+      changed_when: jdk_mount.rc == 0
+
+    - name: Unmount JDK DMG
+      ansible.builtin.command: hdiutil detach "{{ jdk_mount_path.stdout }}"
+      when: not jdk_check.stat.exists and jdk_mount.rc == 0
+      changed_when: jdk_mount.rc == 0
+      failed_when: false
+
+
+
+- name: Install Yubico Authenticator from DMG
+  become: true
+  block:
+    - name: Check if Yubico Authenticator is already installed
+      ansible.builtin.stat:
+        path: /Applications/Yubico Authenticator.app
+      register: yubico_check
+
+    - name: Copy Yubico Authenticator DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/yubico-authenticator-7.2.3-mac.dmg"
+        dest: "/tmp/yubico-authenticator-7.2.3-mac.dmg"
+        mode: '0644'
+      when: not yubico_check.stat.exists
+
+    - name: Mount Yubico Authenticator DMG
+      ansible.builtin.command: hdiutil attach "/tmp/yubico-authenticator-7.2.3-mac.dmg" -nobrowse
+      register: yubico_mount
+      changed_when: yubico_mount.rc == 0
+      when: not yubico_check.stat.exists
+
+    - name: Get Yubico mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/yubico-authenticator-7.2.3-mac.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: yubico_mount_path
+      changed_when: yubico_mount_path.rc == 0
+      when: not yubico_check.stat.exists
+
+    - name: Install Yubico Authenticator
+      ansible.builtin.command: cp -R "{{ yubico_mount_path.stdout }}/Yubico Authenticator.app" /Applications/
+      when: not yubico_check.stat.exists and yubico_mount.rc == 0
+      changed_when: yubico_mount.rc == 0
+
+    - name: Unmount Yubico Authenticator DMG
+      ansible.builtin.command: hdiutil detach "{{ yubico_mount_path.stdout }}"
+      when: not yubico_check.stat.exists and yubico_mount.rc == 0
+      changed_when: yubico_mount.rc == 0
+      failed_when: false
+
+- name: Install Wireshark from DMG
+  become: true
+  block:
+    - name: Check if Wireshark is already installed
+      ansible.builtin.stat:
+        path: /Applications/Wireshark.app
+      register: wireshark_check
+
+    - name: Copy Wireshark DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/Wireshark 4.4.7 Arm 64.dmg"
+        dest: "/tmp/Wireshark 4.4.7 Arm 64.dmg"
+        mode: '0644'
+      when: not wireshark_check.stat.exists
+
+    - name: Mount Wireshark DMG
+      ansible.builtin.command: hdiutil attach "/tmp/Wireshark 4.4.7 Arm 64.dmg" -nobrowse
+      register: wireshark_mount
+      changed_when: wireshark_mount.rc == 0
+      when: not wireshark_check.stat.exists
+
+    - name: Get Wireshark mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/Wireshark 4.4.7 Arm 64.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: wireshark_mount_path
+      changed_when: wireshark_mount_path.rc == 0
+      when: not wireshark_check.stat.exists
+
+    - name: Install Wireshark
+      ansible.builtin.command: cp -R "{{ wireshark_mount_path.stdout }}/Wireshark.app" /Applications/
+      when: not wireshark_check.stat.exists and wireshark_mount.rc == 0
+      changed_when: wireshark_mount.rc == 0
+
+    - name: Unmount Wireshark DMG
+      ansible.builtin.command: hdiutil detach "{{ wireshark_mount_path.stdout }}"
+      when: not wireshark_check.stat.exists and wireshark_mount.rc == 0
+      changed_when: wireshark_mount.rc == 0
+      failed_when: false
+
+- name: Install Podman Desktop from DMG
+  become: true
+  block:
+    - name: Check if Podman Desktop is already installed
+      ansible.builtin.stat:
+        path: /Applications/Podman Desktop.app
+      register: podman_check
+
+    - name: Copy Podman Desktop DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/podman-desktop-airgap-1.19.2-arm64.dmg"
+        dest: "/tmp/podman-desktop-airgap-1.19.2-arm64.dmg"
+        mode: '0644'
+      when: not podman_check.stat.exists
+
+    - name: Mount Podman Desktop DMG
+      ansible.builtin.command: hdiutil attach "/tmp/podman-desktop-airgap-1.19.2-arm64.dmg" -nobrowse
+      register: podman_mount
+      changed_when: podman_mount.rc == 0
+      when: not podman_check.stat.exists
+
+    - name: Get Podman mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/podman-desktop-airgap-1.19.2-arm64.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: podman_mount_path
+      changed_when: podman_mount_path.rc == 0
+      when: not podman_check.stat.exists
+
+    - name: Install Podman Desktop
+      ansible.builtin.command: cp -R "{{ podman_mount_path.stdout }}/Podman Desktop.app" /Applications/
+      when: not podman_check.stat.exists and podman_mount.rc == 0
+      changed_when: podman_mount.rc == 0
+
+    - name: Unmount Podman Desktop DMG
+      ansible.builtin.command: hdiutil detach "{{ podman_mount_path.stdout }}"
+      when: not podman_check.stat.exists and podman_mount.rc == 0
+      changed_when: podman_mount.rc == 0
+      failed_when: false
+
+- name: Install Draw.io from DMG
+  become: true
+  block:
+    - name: Check if Draw.io is already installed
+      ansible.builtin.stat:
+        path: /Applications/draw.io.app
+      register: drawio_check
+
+    - name: Copy Draw.io DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/draw.io-universal-27.0.9.dmg"
+        dest: "/tmp/draw.io-universal-27.0.9.dmg"
+        mode: '0644'
+      when: not drawio_check.stat.exists
+
+    - name: Mount Draw.io DMG
+      ansible.builtin.command: hdiutil attach "/tmp/draw.io-universal-27.0.9.dmg" -nobrowse
+      register: drawio_mount
+      changed_when: drawio_mount.rc == 0
+      when: not drawio_check.stat.exists
+
+    - name: Get Draw.io mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/draw.io-universal-27.0.9.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: drawio_mount_path
+      changed_when: drawio_mount_path.rc == 0
+      when: not drawio_check.stat.exists
+
+    - name: Install Draw.io
+      ansible.builtin.command: cp -R "{{ drawio_mount_path.stdout }}/draw.io.app" /Applications/
+      when: not drawio_check.stat.exists and drawio_mount.rc == 0
+      changed_when: drawio_mount.rc == 0
+
+    - name: Unmount Draw.io DMG
+      ansible.builtin.command: hdiutil detach "{{ drawio_mount_path.stdout }}"
+      when: not drawio_check.stat.exists and drawio_mount.rc == 0
+      changed_when: drawio_mount.rc == 0
+      failed_when: false
+
+- name: Install Kitty from DMG
+  become: true
+  block:
+    - name: Check if Kitty is already installed
+      ansible.builtin.stat:
+        path: /Applications/kitty.app
+      register: kitty_check
+
+    - name: Copy Kitty DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/kitty-0.42.1.dmg"
+        dest: "/tmp/kitty-0.42.1.dmg"
+        mode: '0644'
+      when: not kitty_check.stat.exists
+
+    - name: Mount Kitty DMG
+      ansible.builtin.command: hdiutil attach "/tmp/kitty-0.42.1.dmg" -nobrowse
+      register: kitty_mount
+      changed_when: kitty_mount.rc == 0
+      when: not kitty_check.stat.exists
+
+    - name: Get Kitty mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/kitty-0.42.1.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: kitty_mount_path
+      changed_when: kitty_mount_path.rc == 0
+      when: not kitty_check.stat.exists
+
+    - name: Install Kitty
+      ansible.builtin.command: cp -R "{{ kitty_mount_path.stdout }}/kitty.app" /Applications/
+      when: not kitty_check.stat.exists and kitty_mount.rc == 0
+      changed_when: kitty_mount.rc == 0
+
+    - name: Unmount Kitty DMG
+      ansible.builtin.command: hdiutil detach "{{ kitty_mount_path.stdout }}"
+      when: not kitty_check.stat.exists and kitty_mount.rc == 0
+      changed_when: kitty_mount.rc == 0
+      failed_when: false
+
+- name: Install CMake from DMG
+  become: true
+  block:
+    - name: Check if CMake is already installed
+      ansible.builtin.stat:
+        path: /Applications/CMake.app
+      register: cmake_check
+
+    - name: Copy CMake DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/cmake-4.0.3-macos-universal.dmg"
+        dest: "/tmp/cmake-4.0.3-macos-universal.dmg"
+        mode: '0644'
+      when: not cmake_check.stat.exists
+
+    - name: Mount CMake DMG
+      ansible.builtin.command: hdiutil attach "/tmp/cmake-4.0.3-macos-universal.dmg" -nobrowse
+      register: cmake_mount
+      changed_when: cmake_mount.rc == 0
+      when: not cmake_check.stat.exists
+
+    - name: Get CMake mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/cmake-4.0.3-macos-universal.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: cmake_mount_path
+      changed_when: cmake_mount_path.rc == 0
+      when: not cmake_check.stat.exists
+
+    - name: Install CMake
+      ansible.builtin.command: cp -R "{{ cmake_mount_path.stdout }}/CMake.app" /Applications/
+      when: not cmake_check.stat.exists and cmake_mount.rc == 0
+      changed_when: cmake_mount.rc == 0
+
+    - name: Unmount CMake DMG
+      ansible.builtin.command: hdiutil detach "{{ cmake_mount_path.stdout }}"
+      when: not cmake_check.stat.exists and cmake_mount.rc == 0
+      changed_when: cmake_mount.rc == 0
+      failed_when: false
+
+- name: Install Obsidian from DMG
+  become: true
+  block:
+    - name: Check if Obsidian is already installed
+      ansible.builtin.stat:
+        path: /Applications/Obsidian.app
+      register: obsidian_check
+
+    - name: Copy Obsidian DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/Obsidian-1.8.10.dmg"
+        dest: "/tmp/Obsidian-1.8.10.dmg"
+        mode: '0644'
+      when: not obsidian_check.stat.exists
+
+    - name: Mount Obsidian DMG
+      ansible.builtin.command: hdiutil attach "/tmp/Obsidian-1.8.10.dmg" -nobrowse
+      register: obsidian_mount
+      changed_when: obsidian_mount.rc == 0
+      when: not obsidian_check.stat.exists
+
+    - name: Get Obsidian mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/Obsidian-1.8.10.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: obsidian_mount_path
+      changed_when: obsidian_mount_path.rc == 0
+      when: not obsidian_check.stat.exists
+
+    - name: Install Obsidian
+      ansible.builtin.command: cp -R "{{ obsidian_mount_path.stdout }}/Obsidian.app" /Applications/
+      when: not obsidian_check.stat.exists and obsidian_mount.rc == 0
+      changed_when: obsidian_mount.rc == 0
+
+    - name: Unmount Obsidian DMG
+      ansible.builtin.command: hdiutil detach "{{ obsidian_mount_path.stdout }}"
+      when: not obsidian_check.stat.exists and obsidian_mount.rc == 0
+      changed_when: obsidian_mount.rc == 0
+      failed_when: false
+
+- name: Install MacVim from DMG
+  become: true
+  block:
+    - name: Check if MacVim is already installed
+      ansible.builtin.stat:
+        path: /Applications/MacVim.app
+      register: macvim_check
+
+    - name: Copy MacVim DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/MacVim.dmg"
+        dest: "/tmp/MacVim.dmg"
+        mode: '0644'
+      when: not macvim_check.stat.exists
+
+    - name: Mount MacVim DMG
+      ansible.builtin.command: hdiutil attach "/tmp/MacVim.dmg" -nobrowse
+      register: macvim_mount
+      changed_when: macvim_mount.rc == 0
+      when: not macvim_check.stat.exists
+
+    - name: Get MacVim mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/MacVim.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: macvim_mount_path
+      changed_when: macvim_mount_path.rc == 0
+      when: not macvim_check.stat.exists
+
+    - name: Install MacVim
+      ansible.builtin.command: cp -R "{{ macvim_mount_path.stdout }}/MacVim.app" /Applications/
+      when: not macvim_check.stat.exists and macvim_mount.rc == 0
+      changed_when: macvim_mount.rc == 0
+
+    - name: Unmount MacVim DMG
+      ansible.builtin.command: hdiutil detach "{{ macvim_mount_path.stdout }}"
+      when: not macvim_check.stat.exists and macvim_mount.rc == 0
+      changed_when: macvim_mount.rc == 0
+      failed_when: false
+
+- name: Install Google Chrome from DMG
+  become: true
+  block:
+    - name: Check if Google Chrome is already installed
+      ansible.builtin.stat:
+        path: /Applications/Google Chrome.app
+      register: chrome_check
+
+    - name: Copy Google Chrome DMG to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/googlechrome.dmg"
+        dest: "/tmp/googlechrome.dmg"
+        mode: '0644'
+      when: not chrome_check.stat.exists
+
+    - name: Mount Google Chrome DMG
+      ansible.builtin.command: hdiutil attach "/tmp/googlechrome.dmg" -nobrowse
+      register: chrome_mount
+      changed_when: chrome_mount.rc == 0
+      when: not chrome_check.stat.exists
+
+    - name: Get Google Chrome mount path
+      ansible.builtin.shell: |
+        set -o pipefail
+        hdiutil info | awk '/googlechrome.dmg/ {found=1} found && /\/Volumes\// {print substr($0, index($0, "/Volumes/")); exit}'
+      register: chrome_mount_path
+      changed_when: chrome_mount_path.rc == 0
+      when: not chrome_check.stat.exists
+
+    - name: Install Google Chrome
+      ansible.builtin.command: cp -R "{{ chrome_mount_path.stdout }}/Google Chrome.app" /Applications/
+      when: not chrome_check.stat.exists and chrome_mount.rc == 0
+      changed_when: chrome_mount.rc == 0
+
+    - name: Unmount Google Chrome DMG
+      ansible.builtin.command: hdiutil detach "{{ chrome_mount_path.stdout }}"
+      when: not chrome_check.stat.exists and chrome_mount.rc == 0
+      changed_when: chrome_mount.rc == 0
+      failed_when: false
+
+# Command-line tools (offline): ZIP and binary installations
+
+- name: Install Ninja build system
+  become: true
+  block:
+    - name: Check if Ninja is already installed
+      ansible.builtin.stat:
+        path: /opt/ninja
+      register: ninja_check
+
+    - name: Copy Ninja zip to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/ninja-mac-v1.12.1.zip"
+        dest: "/tmp/ninja-mac-v1.12.1.zip"
+        mode: '0644'
+      when: not ninja_check.stat.exists
+
+    - name: Extract Ninja zip
+      ansible.builtin.unarchive:
+        src: "/tmp/ninja-mac-v1.12.1.zip"
+        dest: "/tmp/"
+        remote_src: true
+      when: not ninja_check.stat.exists
+
+    - name: Install Ninja binary
+      ansible.builtin.command: cp /tmp/ninja /opt/ninja
+      args:
+        creates: /opt/ninja
+      when: not ninja_check.stat.exists
+
+    - name: Make Ninja executable
+      ansible.builtin.file:
+        path: /opt/ninja
+        mode: '0755'
+      when: not ninja_check.stat.exists
+
+    - name: Clean up Ninja temp files
+      ansible.builtin.file:
+        path: "/tmp/ninja-mac-v1.12.1.zip"
+        state: absent
+      when: not ninja_check.stat.exists
+
+- name: Install LLVM 19.1.7
+  become: true
+  block:
+    - name: Check if LLVM is already installed
+      ansible.builtin.stat:
+        path: /opt/LLVM-19.1.7-macOS-ARM64
+      register: llvm_check
+
+    - name: Copy LLVM archive to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/LLVM-19.1.7-macOS-ARM64.tar.xz"
+        dest: "/tmp/LLVM-19.1.7-macOS-ARM64.tar.xz"
+        mode: '0644'
+      when: not llvm_check.stat.exists
+
+    - name: Extract LLVM archive
+      ansible.builtin.command: tar -xf "/tmp/LLVM-19.1.7-macOS-ARM64.tar.xz" -C /opt/
+      when: not llvm_check.stat.exists
+
+    - name: Clean up LLVM temp files
+      ansible.builtin.file:
+        path: "/tmp/LLVM-19.1.7-macOS-ARM64.tar.xz"
+        state: absent
+      when: not llvm_check.stat.exists
+
+- name: Install GitLab Runner binary
+  become: true
+  block:
+    - name: Check if GitLab Runner is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/gitlab-runner
+      register: gitlab_runner_check
+
+    - name: Copy GitLab Runner binary to remote host
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/gitlab-runner"
+        dest: "/usr/local/bin/gitlab-runner"
+        mode: '0755'
+      when: not gitlab_runner_check.stat.exists
